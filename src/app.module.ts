@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TodoModule } from './todo/todo.module';
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { CatsModule } from './cats/cats.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
         }
       },
       inject: [ConfigService],
-    })
+    }),
+    CatsModule
   ],
   controllers: [AppController],
   providers: [AppService],
