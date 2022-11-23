@@ -7,6 +7,9 @@ export type TodoDocument = HydratedDocument<Todo>;
 @Schema()
 export class Todo {
   @Prop()
+  id: string
+
+  @Prop()
   title: string;
 
   @Prop()

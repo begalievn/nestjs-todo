@@ -17,7 +17,7 @@ describe('TodoController', () => {
     updateTodoById: jest.fn((id: string, dto: UpdateTodoDto) => ({
       id,
       title: 'test',
-      description: 'some description',
+      description: 'some',
       completed: true
     }))
   }
@@ -38,7 +38,7 @@ describe('TodoController', () => {
     expect(todoController).toBeDefined();
   });
 
-  it('should create a user', () => {
+  it('should create a todo', () => {
     expect(todoController.addTodo({ title: 'test', description: 'test description' }))
       .toEqual({
         id: expect.any(Number),
@@ -49,7 +49,7 @@ describe('TodoController', () => {
     expect(mockTodoService.addTodo).toHaveBeenCalledWith({title: 'test', description: 'test description'});
   });
 
-  it('should update a user', () => {
+  it('should update a todo', () => {
     let id = '12345'
     let todo = {
       completed: true
@@ -58,7 +58,7 @@ describe('TodoController', () => {
       .toEqual({
         id: id,
         title: 'test',
-        description: 'some description',
+        description: 'description',
         completed: true
       })
 
