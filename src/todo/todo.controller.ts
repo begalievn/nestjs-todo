@@ -1,45 +1,54 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpException, NotFoundException } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Request,
+  UseGuards
+} from "@nestjs/common";
 import { TodoService } from "./todo.service";
-import { Todo } from "./entities/todo.model";
 import { CreateTodoDto } from "./dto/createTodo.dto";
 import { UpdateTodoDto } from "./dto/updateTodo.dto";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
-@Controller('todos')
+@Controller("todos")
+@UseGuards(JwtAuthGuard)
 export class TodoController {
 
-  constructor(private readonly todoService: TodoService) {}
+  constructor(private readonly todoService: TodoService) {
+  }
 
   @Get()
-  getAllTodos() {
-    try {
-      const result = this.todoService.getAllTodos();
+  getAllTodos(@Request() req) {
+      const result = this.todoService.getAllTodos({ user: req.user.userId });
       return result;
-    } catch(e) {
-      throw new NotFoundException();
-    }
   }
 
   @Post()
-  addTodo(@Body() todo: CreateTodoDto) {
-    const generatedId = this.todoService.addTodo(todo);
+  addTodo(@Request() req, @Body() todo: CreateTodoDto) {
+    const user = req.user.userId;
+    const generatedId = this.todoService.addTodo(user, todo);
     return generatedId;
   }
 
-  @Get(':id')
-  getTodoById(@Param('id') id: string) {
-    const todo = this.todoService.findTodoById(id);
+  @Get(":id")
+  getTodoById(@Request() req, @Param("id") id: string) {
+    const todo = this.todoService.findTodoById({ _id: id, user: req.user.userId });
     return todo;
   }
 
-  @Put(':id')
-  updateTodo(@Param('id') id: string, @Body() todo: UpdateTodoDto) {
-    const updatedTodo = this.todoService.updateTodoById(id, todo);
+  @Put(":id")
+  updateTodo(@Request() req, @Param("id") id: string, @Body() todo: UpdateTodoDto) {
+    const updatedTodo = this.todoService.updateTodoById({ _id: id, user: req.user.userId }, todo);
     return updatedTodo;
   }
 
-  @Delete(':id')
-  deleteTodo(@Param('id') id: string) {
-    const removedTodo = this.todoService.removeTodoById(id);
+  @Delete(":id")
+  deleteTodo(@Request() req, @Param("id") id: string) {
+    const removedTodo = this.todoService.removeTodoById({ _id: id, user: req.user.userId });
     return removedTodo;
   }
 }

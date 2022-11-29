@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { TodoRepository } from "./todo.repository";
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { UpdateTodoDto } from "./dto/updateTodo.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { Todo, TodoDocument } from "./entities/todo.model";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 
 
 @Injectable()
@@ -12,36 +11,48 @@ export class TodoService {
     @InjectModel(Todo.name) private readonly todoModel: Model<TodoDocument>) {
   }
 
-  async addTodo(todo) {
-    // const newTodo = new this.todoModel(todo);
-    // const result = await newTodo.save()
-    const result = await this.todoModel.create(todo);
-    console.log(result);
+  async addTodo(user, todo) {
+    const newTodo = { ...todo, user };
+    const result = await this.todoModel.create(newTodo);
     return result._id;
   }
 
-  async getAllTodos() {
-    const result = await this.todoModel.find();
+  async getAllTodos(searchQuery) {
+    const result = await this.todoModel.find(searchQuery);
     return result;
   }
 
-  async findTodoById(id) {
-    const result = await this.todoModel.findById(id).exec();
+  async findTodoById(searchQuery) {
+    if (!Types.ObjectId.isValid(searchQuery._id)) {
+      throw new BadRequestException("Not valid id of a todo");
+    }
+    const result = await this.todoModel.find(searchQuery);
+
+    if(!result) {
+      throw new NotFoundException();
+    }
+
     return result;
   }
 
-  async updateTodoById(id: string, todo: UpdateTodoDto) {
+  async updateTodoById(searchQuery, todo: UpdateTodoDto) {
+    if (!Types.ObjectId.isValid(searchQuery._id)) {
+      throw new BadRequestException("Not valid id of a todo");
+    }
     try {
-      const result = await this.todoModel.findByIdAndUpdate(id, todo, { new: true });
+      const result = await this.todoModel.findOneAndUpdate(searchQuery, todo, { new: true });
       return result;
     } catch (e) {
       throw new NotFoundException();
     }
   }
 
-  async removeTodoById(id: string) {
+  async removeTodoById(searchQuery) {
+    if (!Types.ObjectId.isValid(searchQuery._id)) {
+      throw new BadRequestException("Not valid id of a todo");
+    }
     try {
-      const result = await this.todoModel.findByIdAndRemove(id);
+      const result = await this.todoModel.findOneAndRemove(searchQuery);
       return result;
     } catch (e) {
       throw new NotFoundException();

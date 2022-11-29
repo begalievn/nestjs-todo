@@ -7,18 +7,20 @@ describe('TodoController', () => {
   let todoController: TodoController;
 
   const mockTodoService = {
-    addTodo: jest.fn(dto => {
-      return {
-        id: Date.now(),
-        ...dto
+    addTodo: jest.fn((user, todo) => {
+      const newTodo = {
+        ...todo,
+        user
       }
+      console.log("newTodo", newTodo);
+      return newTodo;
     }),
 
-    updateTodoById: jest.fn((id: string, dto: UpdateTodoDto) => ({
-      id,
+    updateTodoById: jest.fn((searchQuery , dto: UpdateTodoDto) => ({
       title: 'test',
       description: 'some',
-      completed: true
+      completed: true,
+      user: searchQuery.user
     }))
   }
 
@@ -39,14 +41,16 @@ describe('TodoController', () => {
   });
 
   it('should create a todo', () => {
-    expect(todoController.addTodo({ title: 'test', description: 'test description' }))
+    const req = {user: {userId: '1234132klh12l3j4k1l23'}}
+    const todo = { title: 'test', description: 'test description' }
+    expect(todoController.addTodo(req, todo))
       .toEqual({
-        id: expect.any(Number),
         title: 'test',
-        description: 'test description'
+        description: 'test description',
+        user: '1234132klh12l3j4k1l23',
       });
 
-    expect(mockTodoService.addTodo).toHaveBeenCalledWith({title: 'test', description: 'test description'});
+    expect(mockTodoService.addTodo).toHaveBeenCalledWith('1234132klh12l3j4k1l23', {title: 'test', description: 'test description'});
   });
 
   it('should update a todo', () => {
@@ -54,14 +58,15 @@ describe('TodoController', () => {
     let todo = {
       completed: true
     }
-    expect(todoController.updateTodo(id, todo))
+    let req = {
+      user: { userId: 'asdfasdfasdfkjasdf8'}
+    }
+    expect(todoController.updateTodo(req, id, todo))
       .toEqual({
-        id: id,
         title: 'test',
-        description: 'description',
-        completed: true
+        description: 'some',
+        completed: true,
+        user: req.user.userId
       })
-
-    expect(mockTodoService.updateTodoById).toHaveBeenCalled();
   })
 });

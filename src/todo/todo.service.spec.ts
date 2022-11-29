@@ -9,7 +9,7 @@ describe('TodoService', () => {
   let todoService: TodoService;
 
   let mockTodoModel = {
-    find: jest.fn().mockImplementation(() => {
+    find: jest.fn().mockImplementation((searchQuery) => {
       return Promise.resolve([
         {
           _id: '1',
@@ -53,6 +53,6 @@ describe('TodoService', () => {
         _id: expect.any(String)
       }
     ]
-    expect(await todoService.getAllTodos()).toEqual(result);
+    expect(await todoService.getAllTodos({_id: 'asdfasdf'})).toEqual(result);
   })
 });
